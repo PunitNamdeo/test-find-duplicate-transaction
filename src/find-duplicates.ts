@@ -1,5 +1,9 @@
 export interface Transaction {
-  // TODO
+  id: number;
+  source: string;
+  target: string;
+  amount: number;
+  description: string;
 }
 
 /**
@@ -28,22 +32,66 @@ export interface Transaction {
  * @returns {Transaction[]} List of duplicate transactions
  */
 export function findDuplicateTransactions(transactions: Transaction[]): Transaction[] {
-  // TODO
-  // This has been done just to make the test pass for now.
-  return [
+  let duplicateTransaction:Transaction[] = []
+        transactions.reduce((accumulator, current) => {
+            let {id, ...currentRemainingObj} = current;
+                for (let [accumulatorId, accumulatorRemainingObj] of Array.from(accumulator.entries())) {
+                    if (JSON.stringify(accumulatorRemainingObj) === JSON.stringify(currentRemainingObj)) {
+                        duplicateTransaction.push(current)
+                        if (!accumulatorRemainingObj.dupe) {
+                            duplicateTransaction.push({id: accumulatorId, ...accumulatorRemainingObj})
+                            accumulatorRemainingObj.dupe = true;
+                        }
+                        break;
+                    }
+            }
+            return accumulator.set(current.id, currentRemainingObj)
+        }, new Map());
+    duplicateTransaction.sort((transaction1, transaction2) => transaction1.id -transaction2.id);
+  return duplicateTransaction;
+}
+
+console.log(findDuplicateTransactions([
     {
-      id: 1,
-      source: 'A',
-      target: 'B',
-      amount: 300,
-      description: 'tikkie'
+        id: 1,
+        source: 'A',
+        target: 'B',
+        amount: 300,
+        description: 'tikkie'
     },
     {
-      id: 3,
-      source: 'A',
-      target: 'B',
-      amount: 300,
-      description: 'tikkie'
-    }
-  ];
-}
+        id: 2,
+        source: 'B',
+        target: 'C',
+        amount: 1000,
+        description: 'rent'
+    },
+    {
+        id: 3,
+        source: 'A',
+        target: 'B',
+        amount: 300,
+        description: 'tikkie'
+    },
+    {
+        id: 4,
+        source: 'A',
+        target: 'D',
+        amount: 100,
+        description: 'groceries'
+    },
+    {
+        id: 5,
+        source: 'A',
+        target: 'C',
+        amount: 250,
+        description: 'other'
+    },
+    {
+        id: 6,
+        source: 'B',
+        target: 'D',
+        amount: 1000,
+        description: 'rent'
+    },
+]))
